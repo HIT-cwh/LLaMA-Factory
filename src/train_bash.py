@@ -1,7 +1,8 @@
 from llmtuner import run_exp
 
-
+from mmengine.dist import init_dist
 def main():
+    init_dist('slurm', 'nccl', 'deepspeed')
     run_exp()
 
 

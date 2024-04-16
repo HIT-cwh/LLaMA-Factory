@@ -106,6 +106,7 @@ def llama_flash_attn_forward(
     output_attentions: bool = False,
     **kwargs,
 ) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple[torch.Tensor]]]:
+    print(attention_mask.shape)
     # LlamaFlashAttention2 attention does not support output_attentions
     output_attentions = False
 

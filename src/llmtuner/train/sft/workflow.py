@@ -13,6 +13,7 @@ from ...train.sft.metric import ComputeMetrics
 from ...train.sft.trainer import CustomSeq2SeqTrainer
 from ...train.utils import create_modelcard_and_push
 from ..utils import create_custom_optimzer
+from mmengine.dist import init_dist
 
 
 if TYPE_CHECKING:
@@ -20,7 +21,9 @@ if TYPE_CHECKING:
 
     from ...hparams import DataArguments, FinetuningArguments, GeneratingArguments, ModelArguments
 
-
+from transformers.integrations import deepspeed_config
+import torch.distributed as dist
+from datasets import load_dataset, load_from_disk
 def run_sft(
     model_args: "ModelArguments",
     data_args: "DataArguments",
@@ -30,7 +33,14 @@ def run_sft(
     callbacks: Optional[List["TrainerCallback"]] = None,
 ):
     tokenizer = load_tokenizer(model_args)
-    dataset = get_dataset(tokenizer, model_args, data_args, training_args, stage="sft")
+    tokenizer.pad_token_id = tokenizer.eos_token_id
+    if dist.get_rank() == 0:
+        dataset = get_dataset(tokenizer, model_args, data_args, training_args, stage="sft")
+        objects = [dataset]
+    else:
+        objects = [None]
+    dist.broadcast_object_list(objects, src=0)
+    dataset = objects[0]
     model = load_model(tokenizer, model_args, finetuning_args, training_args.do_train)
 
     if training_args.predict_with_generate:

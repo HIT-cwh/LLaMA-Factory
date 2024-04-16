@@ -1,10 +1,10 @@
 #!/bin/bash
 
-deepspeed --num_gpus 4 ../../src/train_bash.py \
+DISABLE_VERSION_CHECK=1 deepspeed --num_gpus 8 ../../src/train_bash.py \
     --deepspeed ds_z3_config.json \
     --stage sft \
     --do_train \
-    --model_name_or_path meta-llama/Llama-2-7b-hf \
+    --model_name_or_path /mnt/petrelfs/share_data/caoweihan/Yi-34B-200K \
     --dataset alpaca_gpt4_en \
     --dataset_dir ../../data \
     --template default \
@@ -12,11 +12,11 @@ deepspeed --num_gpus 4 ../../src/train_bash.py \
     --output_dir ../../saves/LLaMA2-7B/full/sft \
     --overwrite_cache \
     --overwrite_output_dir \
-    --cutoff_len 1024 \
+    --cutoff_len 8192 \
     --preprocessing_num_workers 16 \
     --per_device_train_batch_size 1 \
     --per_device_eval_batch_size 1 \
-    --gradient_accumulation_steps 2 \
+    --gradient_accumulation_steps 1 \
     --lr_scheduler_type cosine \
     --logging_steps 10 \
     --warmup_steps 20 \
@@ -25,8 +25,9 @@ deepspeed --num_gpus 4 ../../src/train_bash.py \
     --evaluation_strategy steps \
     --learning_rate 5e-5 \
     --num_train_epochs 3.0 \
-    --max_samples 3000 \
     --val_size 0.1 \
     --ddp_timeout 1800000 \
     --plot_loss \
-    --fp16
+    --bf16 \
+    --packing True  \
+    --flash_attn

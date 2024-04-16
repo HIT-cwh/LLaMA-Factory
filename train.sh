@@ -1,0 +1,25 @@
+DISABLE_VERSION_CHECK=1 srun -p llm_razor --job-name=intern7b --quotatype=auto --gres=gpu:8 --ntasks=8 --ntasks-per-node=8 --cpus-per-task=16 --kill-on-bad-exit=1 python src/train_bash.py \
+    --deepspeed examples/full_multi_gpu/ds_z3_config.json \
+    --stage sft \
+    --do_train \
+    --model_name_or_path /mnt/petrelfs/share_data/basemodel/checkpoints/llm/hf_hub/models--meta-llama--Llama-2-7b-hf/snapshots/8cca527612d856d7d32bd94f8103728d614eb852 \
+    --dataset alpaca_gpt4_en \
+    --dataset_dir data \
+    --template default \
+    --finetuning_type full \
+    --output_dir work_dirs/alpaca_bs1 \
+    --overwrite_cache \
+    --overwrite_output_dir \
+    --cutoff_len 131072 \
+    --preprocessing_num_workers 16 \
+    --per_device_train_batch_size 1 \
+    --gradient_accumulation_steps 1 \
+    --lr_scheduler_type cosine \
+    --logging_steps 1 \
+    --learning_rate 5e-5 \
+    --num_train_epochs 3.0 \
+    --plot_loss \
+    --bf16 \
+    --packing True  \
+    --flash_attn \
+    --save_steps 10000
